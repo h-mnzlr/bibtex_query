@@ -1,0 +1,2154 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "This API supports rich searching across the Web of Science based on your subscription to retrieve item-level metadata, including times cited counts and contributor addresses/affiliations. Additional operations support the ability to discover related records as well as cited references and citing items. The API supports JSON and XML responses, and this documentation supports trying both response types; however the Models and Example Values are currently valid for JSON only. Throttling and rate limits are applied per agreement with Clarivate Analytics, and quotas will be expressed in the response header (ex. x-rec-amtpermonth-remaining: '15467' or x-req-reqpersec-remaining: '3').",
+    "version": "1.0.0-oas3",
+    "title": "Web of Science API Expanded"
+  },
+  "tags": [
+    {
+      "name": "Search",
+      "description": "Supports discovery and interrogation of Web of Science data."
+    },
+    {
+      "name": "Integration",
+      "description": "Supports integration and data supplement activities."
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Submits a user query and returns results",
+        "description": "The search operation submits a search query to the specified database edition and retrieves data. This operation returns a query ID that can be used in subsequent operations to retrieve more records.",
+        "externalDocs": {
+          "description": "Query examples",
+          "url": "http://images.webofknowledge.com//WOKRS529AR7/help/WOS/hp_advanced_examples.html"
+        },
+        "tags": ["Search"],
+        "parameters": [
+          {
+            "name": "X-ApiKey",
+            "in": "header",
+            "description": "Developer key parameter, which authenticates you to use the service.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "databaseId",
+            "in": "query",
+            "description": "Database to search. Must be a valid database ID, one of the following: BCI/BIOABS/BIOSIS/CCC/DCI/DIIDW/MEDLINE/WOK/WOS/ZOOREC. WOK represents all databases.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Language of search. This element can take only one value: en for English. If no language is specified, English is passed by default.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "usrQuery",
+            "in": "query",
+            "description": "User query for requesting data, ex: TS=(cadmium). The query parser will return errors for invalid queries.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "edition",
+            "in": "query",
+            "description": "Edition(s) to be searched. If null, user permissions will be substituted. Must include the name of the collection and edition name separated by '+', ex: WOS+SCI. Multiple editions are separated by ','. Editions available for collection (WOS) - AHCI,CCR,IC,ISSHP,ISTP,SCI,SSCI,BHCI,BSCI and ESCI.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "publishTimeSpan",
+            "in": "query",
+            "description": "This element specifies a range of publication dates. If publishTimeSpan is used, the loadTimeSpan parameter must be omitted. If publishTimeSpan and loadTimeSpan are both omitted, then the maximum time span will be inferred from the editions data. Beginning and end dates should be specified in the yyyy-mm-dd format separated by '+', ex: 1993-01-01+2009-12-31.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "loadTimeSpan",
+            "in": "query",
+            "description": "Load time span (otherwise described as symbolic time span) defines a range of load dates. The load date is the date a record was added to the database. If load date is specified, the publishTimeSpan parameter must be omitted. If both publishTimeSpan and loadTimeSpan are omitted, the maximum publication date will be inferred from the editions data. Any of D/W/M/Y prefixed with a number where D-Day, M-Month, W-Week, Y-Year allowed. Acceptable value range for Day(0-6), Week(1-52), Month(1-12) and Year(0-10), ex: 5D,30W,10M,8Y.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Number of records to return, must be 0-100.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "firstRecord",
+            "in": "query",
+            "description": "Specific record, if any within the result set to return. Cannot be less than 1 and greater than 100000.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "Order by field(s). Field name and order by clause separated by '+', use A for ASC and D for DESC, ex: PY+D. Multiple values are separated by comma.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "viewField",
+            "in": "query",
+            "description": "Parameter to limit records to selected fields. Because many fields are uniquely identified by a combination of element and attribute, you may not be able to limit record content to a precise degree. For example, the viewField parameter 'titles' will always return document titles, publication names (both full and abbreviated), and book titles. You cannot limit retrieval to only document (item) titles or only publication (source) titles because item and source are attribute values, not elements. You cannot include attributes in viewField parameters. Collection name and field name(s) separated by '+' ex: WOS+titles+addresses, where titles and addresses represent fields.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "optionView",
+            "in": "query",
+            "description": "Result representation. One of either FR or FS where FR=FullRecord and FS=Fields.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "optionOther",
+            "in": "query",
+            "description": "Other option(s) of result representation. HL and On/Off separated by '+' where HL=HighLight: ex. HL+On.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "links",
+            "in": "query",
+            "description": "Flag to return gateway links(Source and Citing) for each record returned in response. Default is false",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success, the fields available in the response will depend on the database searched. For more information on the response schema for WoS Core Collection, please refer to this: https://help.incites.clarivate.com/wosWebServicesExpanded/appendix1Group/wosccFieldNameValues.html",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WosSearchResponse" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/WosSearchResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "429": {
+            "description": "Throttle error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Submits a user query and returns results",
+        "description": "The search operation submits a search query to the specified collection edition and retrieves data. This operation returns a query ID that can be used in subsequent operations to retrieve more records.",
+        "tags": ["Search"],
+        "parameters": [
+          {
+            "name": "X-ApiKey",
+            "in": "header",
+            "description": "Developer Key, ex: ee5e59805bb4cec9f2eae3ba82042afc3decf249",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["databaseId", "usrQuery", "count", "firstRecord"],
+                "properties": {
+                  "databaseId": {
+                    "description": "Database to search. Must be a valid collection ID, ex: BCI/BIOABS/BIOSIS/CABI/CCC/CSCD/DCI/DIIDW/FSTA/INSPEC/KJD/MEDLINE/RSCI/SCIELO/WOK/WOS/ZOOREC. WOK represents all databases",
+                    "type": "string"
+                  },
+                  "lang": {
+                    "description": "Language of search. This element can take only one value: en for English",
+                    "type": "string"
+                  },
+                  "usrQuery": {
+                    "description": "User query for requesting data, ex: TS=(cadmium). The query parser will return errors for invalid queries",
+                    "type": "string"
+                  },
+                  "edition": {
+                    "description": "Edition(s) to be searched. If null, user permissions will be substituted. Must include the name of the collection and edition name separated by +, ex: WOS+SCI. Multiple editions are separated by ','. Editions available for collection(WOS) - AHCI,CCR,IC,ISSHP,ISTP,SCI,SSCI,BHCI,BSCI and ESCI",
+                    "type": "string"
+                  },
+                  "publishTimeSpan": {
+                    "description": "This element specifies a range of publication dates. If publishedTimeSpan is used, the loadTimeSpan parameter must be omitted. If publishedTimeSpan and loadTimeSpan are both omitted, then the maximum time span will be inferred from the editions data. Beginning and end dates should be specified in the yyyy-mm-dd format separated by +, ex: 1993-01-01+2009-12-31",
+                    "type": "string"
+                  },
+                  "loadTimeSpan": {
+                    "description": "Load time span (otherwise described as symbolic time span) defines a range of load dates. The load date is the date a record was added to the collection. If load date is specified, the publishTimeSpan parameter must be omitted. If both publishTimeSpan and loadTimeSpan are omitted, the maximum publication date will be inferred from the editions data. Any of D/W/M/Y prefixed with a number where D-Day, M-Month, W-Week, Y-Year allowed. Acceptable value range for Day(0-6), Week(1-52), Month(1-12) and Year(0-10), ex: 5D,30W,10M,8Y",
+                    "type": "string"
+                  },
+                  "count": {
+                    "description": "Number of records to return, must be 0-100",
+                    "type": "integer"
+                  },
+                  "firstRecord": {
+                    "description": "Specific record, if any within the result set to return. Cannot be less than 1",
+                    "type": "integer"
+                  },
+                  "sortField": {
+                    "description": "Order by field(s). Field name and order by clause separated by +, use A for ASC and D for DESC, ex: PY+D. Multiple values are separated by ,",
+                    "type": "string"
+                  },
+                  "viewField": {
+                    "description": "Parameter to limit records to selected fields. Because many fields are uniquely identified by a combination of element and attribute, you may not be able to limit record content to a precise degree. For example, the viewField parameter 'titles' will always return document titles, publication names (both full and abbreviated), and book titles. You cannot limit retrieval to only document (item) titles or only publication (source) titles because item and source are attribute values, not elements. You cannot include attributes in viewField parameters. Collection name and field name(s) separated by + ex: WOS+titles+addresses, where titles and addresses represent fields",
+                    "type": "string"
+                  },
+                  "optionView": {
+                    "description": "Result representation. Any of FR/FS where FR-FullRecord and FS-Fields",
+                    "type": "string"
+                  },
+                  "optionOther": {
+                    "description": "Other option(s) of result representation. RI and On/Off separated by + where RI-RecordIDs, ex: RI+On",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Query parameters",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WosSearchResponse" }
+              },
+              "application/xrpc": {
+                "schema": { "$ref": "#/components/schemas/WosSearchResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xrpc": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xrpc": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xrpc": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/id/{uniqueId}": {
+      "get": {
+        "tags": ["Integration"],
+        "summary": "Find record(s) by specific id",
+        "description": "This operation returns a record identified by a unique identifier. You may specify multiple identifiers in a single request by separating each ID with a comma.",
+        "parameters": [
+          {
+            "name": "X-ApiKey",
+            "in": "header",
+            "description": "Developer key parameter, which authenticates you to use the service.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "databaseId",
+            "in": "query",
+            "description": "Database to search. Must be a valid database ID, one of the following: BCI/BIOABS/BIOSIS/CCC/DCI/DIIDW/MEDLINE/WOK/WOS/ZOOREC. WOK represents all databases.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Language of search. This element can take only one value: en for English. If no language is specified, English is passed by default.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "uniqueId",
+            "in": "path",
+            "description": "Primary item(s) id to be searched, ex: WOS:000270372400005. Cannot be null or an empty string. Multiple values are separated by comma.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Number of records to return, must be 0-100.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "firstRecord",
+            "in": "query",
+            "description": "Specific record, if any within the result set to return. Cannot be less than 1 and greater than 100000.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "Order by field(s). Field name and order by clause separated by '+', use A for ASC and D for DESC, ex: PY+D. Multiple values are separated by comma.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "viewField",
+            "in": "query",
+            "description": "Parameter to limit records to selected fields. Because many fields are uniquely identified by a combination of element and attribute, you may not be able to limit record content to a precise degree. For example, the viewField parameter 'titles' will always return document titles, publication names (both full and abbreviated), and book titles. You cannot limit retrieval to only document (item) titles or only publication (source) titles because item and source are attribute values, not elements. You cannot include attributes in viewField parameters. Collection name and field name(s) separated by '+' ex: WOS+titles+addresses, where titles and addresses represent fields.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "optionView",
+            "in": "query",
+            "description": "Result representation. One of either FR or FS where FR=FullRecord and FS=Fields.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "optionOther",
+            "in": "query",
+            "description": "Other option(s) of result representation. HL and On/Off separated by '+' where HL=HighLight: ex. HL+On.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "links",
+            "in": "query",
+            "description": "Flag to return gateway links(Source and Citing) for each record returned in response. Default is false",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success, the fields available in the response will depend on the database searched. For more information on the response schema for WoS Core Collection, please refer to this: http://ipscience-help.thomsonreuters.com/wosWebServicesExpanded/appendix1Group/wosccFieldNameValues.html",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WosSearchResponse" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/WosSearchResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "429": {
+            "description": "Throttle error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/query/{queryId}": {
+      "get": {
+        "tags": ["Search"],
+        "summary": "Fetch record(s) by query identifier",
+        "description": "This operation returns record(s) identified by a query identifier.",
+        "parameters": [
+          {
+            "name": "X-ApiKey",
+            "in": "header",
+            "description": "Developer key parameter, which authenticates you to use the service.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "queryId",
+            "in": "path",
+            "description": "Retrieve records based on query identifier.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Number of records to return, must be 0-100.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "firstRecord",
+            "in": "query",
+            "description": "Specific record, if any within the result set to return. Cannot be less than 1 and greater than 100000.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "Order by field(s). Field name and order by clause separated by '+', use A for ASC and D for DESC, ex: PY+D. Multiple values are separated by comma. If sortField was set on the original query, this parameter should be set as sorting is not a property of the query.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "viewField",
+            "in": "query",
+            "description": "Parameter to limit records to selected fields. Because many fields are uniquely identified by a combination of element and attribute, you may not be able to limit record content to a precise degree. For example, the viewField parameter 'titles' will always return document titles, publication names (both full and abbreviated), and book titles. You cannot limit retrieval to only document (item) titles or only publication (source) titles because item and source are attribute values, not elements. You cannot include attributes in viewField parameters. Collection name and field name(s) separated by '+' ex: WOS+titles+addresses, where titles and addresses represent fields.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "optionView",
+            "in": "query",
+            "description": "Result representation. One of either FR or FS where FR=FullRecord and FS=Fields.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "optionOther",
+            "in": "query",
+            "description": "Other option(s) of result representation. HL and On/Off separated by '+' where HL=HighLight: ex. HL+On.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "links",
+            "in": "query",
+            "description": "Flag to return gateway links(Source and Citing) for each record returned in response. Default is false",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success, the fields available in the response will depend on the database searched. For more information on the response schema for WoS Core Collection, please refer to this: http://ipscience-help.thomsonreuters.com/wosWebServicesExpanded/appendix1Group/wosccFieldNameValues.html",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RetrieveResponse" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/RetrieveResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "429": {
+            "description": "Throttle error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/recordids/{queryId}": {
+      "get": {
+        "tags": ["Integration"],
+        "summary": "Return IDs of records for a given query by a query identifier",
+        "description": "This operation returns unique identifiers of records related to a query identifier. No other full record details are returned. This list of identifiers can be compared to an existing set of IDs (eg. supporting duplicate checks) and then be queried using /id/{uniqueId} to return the appropriate metadata.",
+        "parameters": [
+          {
+            "name": "X-ApiKey",
+            "in": "header",
+            "description": "Developer key parameter, which authenticates you to use the service.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "queryId",
+            "in": "path",
+            "description": "Query identifier for which to return results.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Number of record identifiers to return, number between 1-100.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "firstRecord",
+            "in": "query",
+            "description": "Specific record, if any within the result set to return. number between 1-100,000.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "Order by field(s). Field name and order by clause separated by '+', use A for ASC and D for DESC, ex: PY+D. Multiple values are separated by comma.",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "string" } }
+              },
+              "application/xml": {
+                "schema": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/related": {
+      "get": {
+        "summary": "Identify related records",
+        "description": "This operation finds related records for a given unique identifier. Related records will share cited references with the specified record. The operation returns the parent record along with the related records. The total number of related records for a given parent record is shown at the end of the response. The count parameter should be used to limit the number of related records returned by the operation.",
+        "tags": ["Search"],
+        "parameters": [
+          {
+            "name": "X-ApiKey",
+            "in": "header",
+            "description": "Developer key parameter, which authenticates you to use the service.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "databaseId",
+            "in": "query",
+            "description": "Database to search. Must be a valid citation database ID, one of the following: BCI/DRCI/WOK/WOS. WOK represents all databases.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Language of search. This element can take only one value: en for English. If no language is specified, English is passed by default.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "uniqueId",
+            "in": "query",
+            "description": "Primary item id to be searched, ex: WOS:000270372400005. Cannot be null or an empty string.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "edition",
+            "in": "query",
+            "description": "Edition(s) to be searched. If null, user permissions will be substituted. Must include the name of the collection and edition name separated by '+', ex: WOS+SCI. Multiple editions are separated by ','. Editions available for collection(WOS) - AHCI,CCR,IC,ISSHP,ISTP,SCI,SSCI,BHCI,BSCI and ESCI.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "publishTimeSpan",
+            "in": "query",
+            "description": "This element specifies a range of publication dates. If publishTimeSpan is omitted, then the maximum time span will be inferred from the editions data. Beginning and end dates should be specified in the yyyy-mm-dd format separated by '+', ex: 1993-01-01+2009-12-31.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "refId",
+            "in": "query",
+            "description": "References for the parent record which are used to find related records. Multiple values are separated by comma.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Number of records to return, must be 0-100.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "firstRecord",
+            "in": "query",
+            "description": "Specific record, if any within the result set to return. Cannot be less than 1 and greater than 100000.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "Order by field(s). Field name and order by clause separated by '+', use A for ASC and D for DESC, ex: PY+D. Multiple values are separated by comma.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "viewField",
+            "in": "query",
+            "description": "Parameter to limit records to selected fields. Because many fields are uniquely identified by a combination of element and attribute, you may not be able to limit record content to a precise degree. For example, the viewField parameter 'titles' will always return document titles, publication names (both full and abbreviated), and book titles. You cannot limit retrieval to only document (item) titles or only publication (source) titles because item and source are attribute values, not elements. You cannot include attributes in viewField parameters. Collection name and field name(s) separated by '+' ex: WOS+titles+addresses, where titles and addresses represent fields.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "optionView",
+            "in": "query",
+            "description": "Result representation. One of either FR or FS where FR=FullRecord and FS=Fields.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "optionOther",
+            "in": "query",
+            "description": "Other option(s) of result representation. HL and On/Off separated by '+' where HL=HighLight: ex. HL+On.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "links",
+            "in": "query",
+            "description": "Flag to return gateway links(Source and Citing) for each record returned in response. Default is false",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success, the fields available in the response will depend on the database searched. For more information on the response schema for WoS Core Collection, please refer to this: http://ipscience-help.thomsonreuters.com/wosWebServicesExpanded/appendix1Group/wosccFieldNameValues.html",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WosSearchResponse" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/WosSearchResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "429": {
+            "description": "Throttle error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/citing": {
+      "get": {
+        "tags": ["Search"],
+        "summary": "Find citing items",
+        "description": "This operation finds citing articles for the article specified by unique identifier. You may specify only one identifier per request. Web of Science Core Collection (WOS) is the only valid database for this operation.",
+        "parameters": [
+          {
+            "name": "X-ApiKey",
+            "in": "header",
+            "description": "Developer key parameter, which authenticates you to use the service.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "databaseId",
+            "in": "query",
+            "description": "Database to be searched. Must be a valid citation database ID, one of the following: BCI/DRCI/WOK/WOS. WOK represents all databases.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Language of search. This element can take only one value: en for English. If no language is specified, English is passed by default.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "uniqueId",
+            "in": "query",
+            "description": "Primary item id to be searched, ex: WOS:000270372400005. Cannot be null or an empty string.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "edition",
+            "in": "query",
+            "description": "Edition(s) to be searched. If null, user permissions will be substituted. Must include the name of the collection and edition name separated by '+', ex: WOS+SCI. Multiple editions are separated by ','. Editions available for collection(WOS) - AHCI,CCR,IC,ISSHP,ISTP,SCI,SSCI,BHCI,BSCI and ESCI.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "publishTimeSpan",
+            "in": "query",
+            "description": "This element specifies a range of publication dates. If publishTimeSpan is omitted, then the maximum time span will be inferred from the editions data. Beginning and end dates should be specified in the yyyy-mm-dd format separated by '+', ex: 1993-01-01+2009-12-31.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Number of records to return, must be 0-100.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "firstRecord",
+            "in": "query",
+            "description": "Specific record, if any within the result set to return. Cannot be less than 1 and greater than 100000.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "Order by field(s). Field name and order by clause separated by '+', use A for ASC and D for DESC, ex: PY+D. Multiple values are separated by comma.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "viewField",
+            "in": "query",
+            "description": "Parameter to limit records to selected fields. Because many fields are uniquely identified by a combination of element and attribute, you may not be able to limit record content to a precise degree. For example, the viewField parameter 'titles' will always return document titles, publication names (both full and abbreviated), and book titles. You cannot limit retrieval to only document (item) titles or only publication (source) titles because item and source are attribute values, not elements. You cannot include attributes in viewField parameters. Collection name and field name(s) separated by '+' ex: WOS+titles+addresses, where titles and addresses represent fields.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "optionView",
+            "in": "query",
+            "description": "Result representation. One of either FR or FS where FR=FullRecord and FS=Fields.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "optionOther",
+            "in": "query",
+            "description": "Other option(s) of result representation. HL and On/Off separated by '+' where HL=HighLight: ex. HL+On.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "links",
+            "in": "query",
+            "description": "Flag to return gateway links(Source and Citing) for each record returned in response. Default is false",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success, the fields available in the response will depend on the database searched. For more information on the response schema for WoS Core Collection, please refer to this: http://ipscience-help.thomsonreuters.com/wosWebServicesExpanded/appendix1Group/wosccFieldNameValues.html",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WosSearchResponse" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/WosSearchResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "429": {
+            "description": "Throttle error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/references": {
+      "get": {
+        "tags": ["Search"],
+        "summary": "Find cited references by id",
+        "description": "This operation returns references cited by an article identified by a unique identifier. You may specify only one identifier per request.",
+        "parameters": [
+          {
+            "name": "X-ApiKey",
+            "in": "header",
+            "description": "Developer key parameter, which authenticates you to use the service.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "databaseId",
+            "in": "query",
+            "description": "Database to search. Must be a valid citation database ID, one of the following: BCI/DRCI/WOK/WOS. WOK represents all databases.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Language of search. This element can take only one value: en for English. If no language is specified, English is passed by default.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "uniqueId",
+            "in": "query",
+            "description": "Primary item id to be searched, ex: WOS:000270372400005. Cannot be null or an empty string.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Number of records to return, must be 0-100.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "firstRecord",
+            "in": "query",
+            "description": "Specific record, if any within the result set to return. Cannot be less than 1 and greater than 100000.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "Order by field(s). Field name and order by clause separated by '+', use A for ASC and D for DESC, ex: PY+D. Multiple values are separated by comma.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "optionOther",
+            "in": "query",
+            "description": "Other option(s) of result representation. HL and On/Off separated by '+' where HL=HighLight: ex. HL+On.",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ReferenceResponse" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/ReferenceResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "429": {
+            "description": "Throttle error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/category-context/{uniqueId}": {
+      "get": {
+        "tags": ["Search"],
+        "summary": "Get categorization context about the citing/cited references of a given document",
+        "description": "This operation returns response that includes ASCA traditional category distribution for a set of documents",
+        "parameters": [
+          {
+            "name": "X-ApiKey",
+            "in": "header",
+            "description": "Developer key parameter, which authenticates you to use the service.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "uniqueId",
+            "in": "path",
+            "description": "Primary item id to be searched, ex: WOS:000270372400005. Cannot be null or an empty string.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "min",
+            "in": "query",
+            "description": "Minimum number of citings/references to be considered",
+            "required": false,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "maxCat",
+            "in": "query",
+            "description": "Maximum number of categories to retrieve",
+            "required": false,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "description": "Used to define the objects that should be returned. Valid values are C/R/A/CR/RC/RA/AR/CA/AC/CRA where R = Cited paper set, C = Citing paper set and A = Aggregation of Citing AND Cited paper sets. Default is CRA.",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryContextResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryContextResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, for invalid UT",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "429": {
+            "description": "Throttle error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/errorMessage" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [{ "url": "https://wos-api.clarivate.com/api/wos" }],
+  "components": {
+    "schemas": {
+      "ReferenceResponse": {
+        "type": "object",
+        "properties": {
+          "Data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ReferenceRecord" }
+          },
+          "QueryResult": { "$ref": "#/components/schemas/QueryResult" }
+        }
+      },
+      "WosSearchResponse": {
+        "type": "object",
+        "properties": {
+          "Data": {
+            "type": "object",
+            "properties": {
+              "Records": {
+                "type": "object",
+                "properties": {
+                  "records": {
+                    "type": "object",
+                    "properties": {
+                      "REC": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/WosRecord" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "QueryResult": { "$ref": "#/components/schemas/QueryResult" }
+        }
+      },
+      "RetrieveResponse": {
+        "type": "object",
+        "properties": {
+          "Records": {
+            "type": "object",
+            "properties": {
+              "records": {
+                "type": "object",
+                "properties": {
+                  "REC": {
+                    "type": "array",
+                    "items": { "$ref": "#/components/schemas/WosRecord" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "QueryResult": {
+        "type": "object",
+        "properties": {
+          "QueryID": { "type": "string" },
+          "RecordsSearched": { "type": "integer" },
+          "RecordsFound": { "type": "integer" }
+        }
+      },
+      "ReferenceRecord": {
+        "type": "object",
+        "properties": {
+          "UID": { "type": "string" },
+          "citedAuthor": { "type": "string" },
+          "timesCited": { "type": "integer" },
+          "year": { "type": "integer" },
+          "page": { "type": "integer" },
+          "citedWork": { "type": "string" },
+          "citedTitle": { "type": "string" },
+          "doi": { "type": "string" }
+        }
+      },
+      "WosRecord": {
+        "type": "object",
+        "properties": {
+          "UID": { "type": "string" },
+          "static_data": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "object",
+                "properties": {
+                  "pub_info": {
+                    "type": "object",
+                    "properties": {
+                      "coverdate": { "type": "string" },
+                      "pubyear": { "type": "integer" },
+                      "issue": { "type": "integer" },
+                      "sortdate": { "type": "string" },
+                      "has_abstract": { "type": "string" },
+                      "pubtype": { "type": "string" },
+                      "page": {
+                        "type": "object",
+                        "properties": {
+                          "end": { "type": "integer" },
+                          "begin": { "type": "integer" },
+                          "page_count": { "type": "integer" },
+                          "content": { "type": "string" },
+                          "vol": { "type": "integer" },
+                          "pubday": { "type": "integer" },
+                          "pubmonth": { "type": "string" },
+                          "medium": { "type": "string" },
+                          "edate": { "type": "string" },
+                          "model": { "type": "string" }
+                        }
+                      }
+                    }
+                  },
+                  "names": {
+                    "type": "object",
+                    "properties": {
+                      "count": { "type": "integer" },
+                      "name": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "seq_no": { "type": "integer" },
+                            "role": { "type": "string" },
+                            "full_name": { "type": "string" },
+                            "reprint": { "type": "string" },
+                            "last_name": { "type": "string" },
+                            "display_name": { "type": "string" },
+                            "wos_standard": { "type": "string" },
+                            "r_id": { "type": "string" },
+                            "daisng_id": { "type": "integer" },
+                            "first_name": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "doctypes": {
+                    "type": "object",
+                    "properties": {
+                      "doctype": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "count": { "type": "integer" }
+                    }
+                  },
+                  "publishers": {
+                    "type": "object",
+                    "properties": {
+                      "publisher": {
+                        "type": "object",
+                        "properties": {
+                          "names": {
+                            "type": "object",
+                            "properties": {
+                              "count": { "type": "integer" },
+                              "name": {
+                                "type": "object",
+                                "properties": {
+                                  "seq_no": { "type": "integer" },
+                                  "role": { "type": "string" },
+                                  "full_name": { "type": "string" },
+                                  "unified_name": { "type": "string" },
+                                  "addr_no": { "type": "integer" },
+                                  "display_name": { "type": "string" }
+                                }
+                              }
+                            }
+                          },
+                          "address_spec": {
+                            "type": "object",
+                            "properties": {
+                              "city": { "type": "string" },
+                              "addr_no": { "type": "integer" },
+                              "full_address": { "type": "string" },
+                              "url_spec": {
+                                "type": "object",
+                                "properties": null,
+                                "url": { "type": "string" }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "EWUID": {
+                    "type": "object",
+                    "properties": {
+                      "WUID": {
+                        "type": "object",
+                        "properties": { "coll_id": { "type": "string" } }
+                      },
+                      "edition": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": { "value": { "type": "string" } }
+                        }
+                      }
+                    }
+                  },
+                  "titles": {
+                    "type": "object",
+                    "properties": {
+                      "count": { "type": "integer" },
+                      "title": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "type": { "type": "string" },
+                            "content": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "item": {
+                "type": "object",
+                "properties": {
+                  "xsi:type": { "type": "string" },
+                  "coll_id": { "type": "string" },
+                  "ids": {
+                    "type": "object",
+                    "properties": {
+                      "avail": { "type": "string" },
+                      "content": { "type": "string" }
+                    }
+                  },
+                  "xmlns:xsi": { "type": "string" },
+                  "bib_pagecount": {
+                    "type": "object",
+                    "properties": {
+                      "type": { "type": "string" },
+                      "content": { "type": "integer" }
+                    }
+                  },
+                  "bib_id": { "type": "string" },
+                  "Header": {
+                    "type": "object",
+                    "properties": {
+                      "ProdIssueYear": { "type": "number" },
+                      "Owner": { "type": "string" },
+                      "ProdIssueNumber": { "type": "number" },
+                      "DateProduced": { "type": "number" }
+                    }
+                  },
+                  "Bibliographic": {
+                    "type": "object",
+                    "properties": {
+                      "LiteratureTypeList": {
+                        "type": "object",
+                        "properties": {
+                          "LiteratureTypeText": { "type": "string" }
+                        }
+                      },
+                      "ItemTitle": {
+                        "type": "object",
+                        "properties": {
+                          "TitleEnglish": { "type": "string" },
+                          "ZRTitle": { "type": "string" }
+                        }
+                      },
+                      "BiblioNotes": { "type": "string" },
+                      "SourceConcat": { "type": "string" }
+                    }
+                  },
+                  "Index": {
+                    "type": "object",
+                    "properties": {
+                      "MajorConceptData": {
+                        "type": "object",
+                        "properties": {
+                          "MajorConceptList": {
+                            "type": "object",
+                            "properties": {
+                              "MajorConcept": { "type": "string" }
+                            }
+                          }
+                        }
+                      },
+                      "TaxonomicData": {
+                        "type": "object",
+                        "properties": {
+                          "TaxonomicList": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "SuperTaxa": {
+                                  "type": "array",
+                                  "items": { "type": "string" }
+                                },
+                                "TaxaNotes": { "type": "string" },
+                                "OrgData": {
+                                  "type": "object",
+                                  "properties": {
+                                    "OrganismList": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "properties": {
+                                          "OrganismSpec": {
+                                            "type": "object",
+                                            "properties": {
+                                              "OrgDetail": { "type": "string" }
+                                            }
+                                          },
+                                          "TypeofName": { "type": "string" },
+                                          "OrganismName": { "type": "string" }
+                                        }
+                                      }
+                                    },
+                                    "OrgClassifier": { "type": "string" }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "ConceptCodeList": {
+                        "type": "object",
+                        "properties": { "ConceptCode": { "type": "string" } }
+                      },
+                      "GeographicData": {
+                        "type": "object",
+                        "properties": {
+                          "GeographicList": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": null,
+                              "ZoogeographicalRegion": {
+                                "type": "string",
+                                "GeographicTerm": { "type": "string" },
+                                "GeopoliticalTerms": { "type": "string" }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "bib_pages": {
+                    "type": "object",
+                    "properties": { "type": { "type": "string" } }
+                  },
+                  "subjects": {
+                    "type": "object",
+                    "properties": {
+                      "subject": {
+                        "type": "object",
+                        "properties": {
+                          "code": { "type": "string" },
+                          "edition": { "type": "string" },
+                          "content": { "type": "string" }
+                        }
+                      },
+                      "count": { "type": "number" }
+                    }
+                  },
+                  "tocseq": { "type": "number" },
+                  "Status": { "type": "string" },
+                  "MedlineJournalInfo": {
+                    "type": "object",
+                    "properties": {
+                      "NlmUniqueID": { "type": "number" },
+                      "Country": { "type": "string" },
+                      "ISSNLinking": { "type": "string" }
+                    }
+                  },
+                  "Owner": { "type": "string" },
+                  "CitationSubset": { "type": "string" },
+                  "DateCompleted": { "type": "string" },
+                  "KeywordList": {
+                    "type": "object",
+                    "properties": {
+                      "Owner": { "type": "string" },
+                      "Keyword": {
+                        "type": "object",
+                        "properties": {
+                          "MajorTopicYN": { "type": "string" },
+                          "content": { "type": "string" }
+                        }
+                      }
+                    }
+                  },
+                  "MeshHeadingList": {
+                    "type": "object",
+                    "properties": {
+                      "MeshHeading": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "DescriptorName": {
+                              "type": "object",
+                              "properties": {
+                                "UI": { "type": "string" },
+                                "MajorTopicYN": { "type": "string" },
+                                "content": { "type": "string" }
+                              }
+                            },
+                            "TreeCodeList": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "TreeCode": {
+                                    "type": "object",
+                                    "properties": {
+                                      "MajorTopicYN": { "type": "string" },
+                                      "content": { "type": "string" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "DateRevised": { "type": "string" },
+                  "Affiliation": { "type": "string" },
+                  "ZRIndex": {
+                    "type": "object",
+                    "properties": {
+                      "DescriptorsData": {
+                        "type": "object",
+                        "properties": {
+                          "DescriptorsList": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "DescrSubjectsList": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "DescrControlledTerm": {
+                                        "type": "object",
+                                        "properties": {
+                                          "content": { "type": "string" },
+                                          "Display": { "type": "number" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "DescrOrganismList": {
+                                  "type": "object",
+                                  "properties": {
+                                    "DescrOrganisms": {
+                                      "type": "array",
+                                      "items": { "type": "string" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "BroadTermsList": {
+                        "type": "object",
+                        "properties": {
+                          "BroadTerms": {
+                            "type": "array",
+                            "items": { "type": "string" }
+                          }
+                        }
+                      },
+                      "ZRTaxonomicData": {
+                        "type": "object",
+                        "properties": {
+                          "SuperTaxaList": {
+                            "type": "object",
+                            "properties": {
+                              "SuperTaxa": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "Indent": { "type": "number" },
+                                    "content": { "type": "string" }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "SystematicsList": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "OrganismHierarchyData": {
+                                  "type": "object",
+                                  "properties": {
+                                    "OrganismHierarchy": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "properties": {
+                                          "SequenceIndent": {
+                                            "type": "number"
+                                          },
+                                          "content": { "type": "string" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "SystematicsEntryList": {
+                                  "type": "object",
+                                  "properties": {
+                                    "SystematicsControlledTerm": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "OrganismAuthordate": { "type": "string" },
+                                "OrganismName": {
+                                  "type": "object",
+                                  "properties": {
+                                    "OrganismID": { "type": "number" },
+                                    "content": { "type": "string" }
+                                  }
+                                },
+                                "OrganismClassifier": { "type": "string" }
+                              }
+                            }
+                          },
+                          "TaxaNotesList": {
+                            "type": "object",
+                            "properties": {
+                              "TaxaNotes": {
+                                "type": "array",
+                                "items": { "type": "string" }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "fullrecord_metadata": {
+                "type": "object",
+                "properties": {
+                  "addresses": {
+                    "type": "object",
+                    "properties": {
+                      "count": { "type": "integer" },
+                      "address_name": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "names": {
+                              "type": "object",
+                              "properties": {
+                                "count": { "type": "integer" },
+                                "name": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "seq_no": { "type": "integer" },
+                                      "role": { "type": "string" },
+                                      "full_name": { "type": "string" },
+                                      "reprint": { "type": "string" },
+                                      "addr_no": { "type": "integer" },
+                                      "last_name": { "type": "string" },
+                                      "display_name": { "type": "string" },
+                                      "first_name": { "type": "string" }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "address_spec": {
+                              "type": "object",
+                              "properties": {
+                                "zip": {
+                                  "type": "object",
+                                  "properties": {
+                                    "location": { "type": "string" },
+                                    "content": { "type": "integer" }
+                                  }
+                                },
+                                "country": { "type": "string" },
+                                "city": { "type": "string" },
+                                "addr_no": { "type": "integer" },
+                                "organizations": {
+                                  "type": "object",
+                                  "properties": {
+                                    "organization": {
+                                      "type": "array",
+                                      "items": {
+                                        "pref": "string",
+                                        "content": "string"
+                                      }
+                                    },
+                                    "count": { "type": "integer" }
+                                  }
+                                },
+                                "full_address": { "type": "string" },
+                                "state": { "type": "string" },
+                                "suborganizations": {
+                                  "type": "object",
+                                  "properties": {
+                                    "count": { "type": "integer" },
+                                    "suborganization": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "properties": {
+                                          "count": { "type": "integer" },
+                                          "suborganization": {
+                                            "type": "string"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "category_info": {
+                    "type": "object",
+                    "properties": {
+                      "subheadings": {
+                        "type": "object",
+                        "properties": {
+                          "count": { "type": "integer" },
+                          "subheading": {
+                            "type": "array",
+                            "items": { "type": "string" }
+                          }
+                        }
+                      },
+                      "subjects": {
+                        "type": "object",
+                        "properties": {
+                          "subject": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "ascatype": { "type": "string" },
+                                "content": { "type": "string" }
+                              }
+                            }
+                          },
+                          "count": { "type": "integer" }
+                        }
+                      },
+                      "headings": {
+                        "type": "object",
+                        "properties": {
+                          "heading": { "type": "string" },
+                          "count": { "type": "integer" }
+                        }
+                      }
+                    }
+                  },
+                  "normalized_languages": {
+                    "type": "object",
+                    "properties": {
+                      "count": { "type": "integer" },
+                      "language": {
+                        "type": "object",
+                        "properties": {
+                          "type": { "type": "string" },
+                          "content": { "type": "string" }
+                        }
+                      }
+                    }
+                  },
+                  "languages": {
+                    "type": "object",
+                    "properties": {
+                      "count": { "type": "integer" },
+                      "language": {
+                        "type": "object",
+                        "properties": {
+                          "type": { "type": "string" },
+                          "content": { "type": "string" }
+                        }
+                      }
+                    }
+                  },
+                  "refs": {
+                    "type": "object",
+                    "properties": { "count": { "type": "integer" } }
+                  },
+                  "reprint_addresses": {
+                    "type": "object",
+                    "properties": {
+                      "count": { "type": "integer" },
+                      "address_name": {
+                        "type": "object",
+                        "properties": {
+                          "names": {
+                            "type": "object",
+                            "properties": {
+                              "count": { "type": "integer" },
+                              "name": {
+                                "type": "object",
+                                "properties": {
+                                  "seq_no": { "type": "integer" },
+                                  "role": { "type": "string" },
+                                  "full_name": { "type": "string" },
+                                  "reprint": { "type": "string" },
+                                  "display": { "type": "string" },
+                                  "addr_no": { "type": "integer" },
+                                  "last_name": { "type": "string" },
+                                  "display_name": { "type": "string" },
+                                  "wos_standard": { "type": "string" },
+                                  "first_name": { "type": "string" }
+                                }
+                              }
+                            }
+                          },
+                          "address_spec": {
+                            "type": "object",
+                            "properties": {
+                              "zip": {
+                                "type": "object",
+                                "properties": {
+                                  "location": { "type": "string" },
+                                  "content": { "type": "integer" }
+                                }
+                              },
+                              "country": { "type": "string" },
+                              "city": { "type": "string" },
+                              "addr_no": { "type": "integer" },
+                              "organizations": {
+                                "type": "object",
+                                "properties": {
+                                  "organization": {
+                                    "type": "array",
+                                    "items": {
+                                      "pref": { "type": "string" },
+                                      "content": { "type": "string" }
+                                    }
+                                  },
+                                  "count": { "type": "integer" }
+                                }
+                              },
+                              "full_address": { "type": "string" },
+                              "state": { "type": "string" },
+                              "suborganizations": {
+                                "type": "object",
+                                "properties": {
+                                  "count": { "type": "integer" },
+                                  "suborganization": {
+                                    "type": "array",
+                                    "items": { "type": "string" }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "abstracts": {
+                    "type": "object",
+                    "properties": {
+                      "count": { "type": "integer" },
+                      "abstract": {
+                        "type": "object",
+                        "properties": {
+                          "abstract_text": {
+                            "type": "object",
+                            "properties": {
+                              "p": { "type": "string" },
+                              "count": { "type": "integer" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "normalized_doctypes": {
+                    "type": "object",
+                    "properties": {
+                      "doctype": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "count": { "type": "integer" }
+                    }
+                  }
+                }
+              },
+              "contributors": {
+                "type": "object",
+                "properties": {
+                  "contributor": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "object",
+                        "properties": {
+                          "seq_no": { "type": "integer" },
+                          "role": { "type": "string" },
+                          "full_name": { "type": "string" },
+                          "last_name": { "type": "string" },
+                          "display_name": { "type": "string" },
+                          "r_id": { "type": "string" },
+                          "first_name": { "type": "string" }
+                        }
+                      }
+                    }
+                  },
+                  "count": { "type": "integer" }
+                }
+              }
+            }
+          },
+          "dates": {
+            "type": "object",
+            "properties": {
+              "date_modified": { "type": "string" },
+              "date_created": { "type": "string" }
+            }
+          },
+          "r_id_disclaimer": { "type": "string" },
+          "dynamic_data": {
+            "type": "object",
+            "properties": {
+              "citation_related": {
+                "type": "object",
+                "properties": {
+                  "tc_list": {
+                    "type": "object",
+                    "properties": {
+                      "silo_tc": {
+                        "type": "object",
+                        "properties": {
+                          "coll_id": { "type": "string" },
+                          "local_count": { "type": "integer" }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "cluster_related": {
+                "type": "object",
+                "properties": {
+                  "identifiers": {
+                    "type": "object",
+                    "properties": {
+                      "identifier": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "type": { "type": "string" },
+                            "value": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "CategoryContextResponse": {
+        "type": "object",
+        "properties": {
+          "Data": {
+            "type": "object",
+            "properties": {
+              "UID": { "type": "string" },
+              "aggregated": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/CategoryContext" }
+              },
+              "citing": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/CategoryContext" }
+              },
+              "references": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/CategoryContext" }
+              }
+            }
+          }
+        }
+      },
+      "CategoryContext": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string" },
+          "count": { "type": "integer" },
+          "subject": { "type": "string" }
+        }
+      },
+      "errorMessage": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "description": "Error Code" },
+          "message": { "type": "string", "description": "Error Message" },
+          "id": { "type": "string", "description": "Request Id" }
+        }
+      }
+    },
+    "securitySchemes": {
+      "key": { "type": "apiKey", "in": "header", "name": "X-ApiKey" }
+    }
+  },
+  "security": [{ "key": [] }]
+}
