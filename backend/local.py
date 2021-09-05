@@ -1,11 +1,13 @@
+"""
+Provide a class representing a backend based on the local filesystem.
+"""
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
 import backend
-import backend.utils as utils
-
-from typing import Callable
+from backend import utils
 
 DEFAULT_DIR = Path(
     os.environ.get('XDG_CACHE_HOME', default='~/.cache')
@@ -14,6 +16,7 @@ DEFAULT_DIR = Path(
 
 @dataclass
 class LocalBackend(backend.PaperSource):
+    """Papersource that uses a local file-based structure to save papers."""
     base_dir: Path = DEFAULT_DIR
     naming_convention: Callable[[str, str], Path] = utils.naming_convention
 
@@ -30,8 +33,8 @@ class LocalBackend(backend.PaperSource):
         return backend.Paper(key, ref, lambda: open(file_path, 'rb'))
 
     @utils.before_method(_ensure_exists)
-    def post_paper(self, pa: backend.Paper):
-        file_path = self.base_dir / self.naming_convention(pa.key, 'pdf')
+    def post_paper(self, papr: backend.Paper):
+        file_path = self.base_dir / self.naming_convention(papr.key, 'pdf')
         if file_path.exists():
             raise NotImplementedError(f"{file_path=} already exists.")
-        utils.pipe_stream(pa.data_lzy, lambda: open(file_path, 'wb'))
+        utils.pipe_stream(papr.data_lzy, lambda: open(file_path, 'wb'))

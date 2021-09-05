@@ -1,11 +1,13 @@
+"""
+Module that supplies base classes to deal with sources and papers.
+"""
 import io
 import contextlib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-
-import backend.utils as utils
-
 from typing import Generator
+
+from backend import utils
 
 
 @dataclass
@@ -17,6 +19,7 @@ class Paper:
 
     @contextlib.contextmanager
     def load(self) -> Generator[io.BufferedReader, None, None]:
+        """Load data for a paper as a I/O stream."""
         data_stream = self.data_lzy()
         if not data_stream.readable():
             raise NotImplementedError("Paper data cannot be read.")
@@ -37,5 +40,5 @@ class PaperSource(ABC):
         """Retrieve a paper from source."""
 
     @abstractmethod
-    def post_paper(self, pa: Paper):
+    def post_paper(self, papr: Paper):
         """Post a paper to source or raise a NotImplementedError if unable."""

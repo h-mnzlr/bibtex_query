@@ -1,3 +1,6 @@
+"""
+Module that is responsible for defining backends and calling them appropriatly.
+"""
 import base_classes
 import backend
 
@@ -13,12 +16,12 @@ available_db: list[base_classes.Library] = [
 # from somewhere else.
 def aquire_paper(key: str, ref: dict) -> bytes:
     """High-level function to retrieve paper or raise an Error."""
-    for db in available_db:
-        print(f"Backend {db=} ", end='')
+    for dtb in available_db:
+        print(f"Backend {dtb=} ", end='')
         try:
-            paper = db.get_paper(key, ref)
-        except NotImplementedError as e:
-            print(f"can't find the file:\n{e}")
+            paper = dtb.get_paper(key, ref)
+        except NotImplementedError as err:
+            print(f"can't find the file:\n{err}")
             continue
         print(f"found {paper=}.")
         save_paper(paper)
@@ -27,12 +30,12 @@ def aquire_paper(key: str, ref: dict) -> bytes:
     raise ValueError("No suitable bibtex keys found.")
 
 
-def save_paper(pa: backend.Paper):
+def save_paper(papr: backend.Paper):
     """High-level function to save a paper to all possible databases."""
-    for db in available_db:
-        print(f"Backend {db=} ", end='')
+    for dtb in available_db:
+        print(f"Backend {dtb=} ", end='')
         try:
-            db.post_paper(pa)
+            dtb.post_paper(papr)
             print("saved succesfully.")
-        except NotImplementedError as e:
-            print(f"can't save:\n{e}")
+        except NotImplementedError as err:
+            print(f"can't save:\n{err}")

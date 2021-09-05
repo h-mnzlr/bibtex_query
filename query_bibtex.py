@@ -1,5 +1,7 @@
 #!/usr/bin/python3.10
-"""Short script too open an url from a bibtex object passed via stdin."""
+"""
+Short script too open an url from a bibtex object passed via stdin.
+"""
 
 import bibtexparser  # type: ignore
 
@@ -17,6 +19,7 @@ def read_bib_stdin() -> bibtexparser.bibdatabase.BibDatabase:
 
 
 def main():
+    """Main program flow controle function."""
     bib_db = read_bib_stdin()
     for key, ref in bib_db.get_entry_dict().items():
         try:
