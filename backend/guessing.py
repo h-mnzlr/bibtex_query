@@ -39,6 +39,8 @@ class GuessingBackend(backend.PaperSource):
                 return craft_request('https://dl.acm.org/doi/pdf', *params)
             case['aip.scitation.org', 'doi', *params]:
                 return craft_request('https://aip.scitation.org/doi/pdf', *params)
+            case['epubs.siam.org', 'doi', 'abs', *params]:
+                return craft_request('https://epubs.siam.org/doi/pdf', *params)
             case['journals.aps.org', 'prl', 'abstract', *params]:
                 return craft_request('https://journals.aps.org/prl/pdf', *params)
             case['journals.aps.org', 'pre', 'abstract', *params]:
