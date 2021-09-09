@@ -13,8 +13,14 @@ G_SCHOLAR_QUERY = "https://scholar.google.com/scholar?hl=en&q={}"
 
 def read_bib_stdin() -> bibtexparser.bibdatabase.BibDatabase:
     """Read stdin into a BibDatabase object."""
+    def clean_entry(entry: dict[str, str]) -> dict[str, str]:
+        """Remove all brackets around the fields."""
+        entry = {key: value.strip("{}") for key, value in entry.items()}
+        return entry
+
+    parser = bibtexparser.bparser.BibTexParser(customization=clean_entry)
     bib_string = utils.read_stdin().decode('utf-8')
-    bibtex = bibtexparser.loads(bib_string)
+    bibtex = parser.parse(bib_string)
     return bibtex
 
 
